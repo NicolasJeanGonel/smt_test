@@ -268,7 +268,7 @@ from smt.surrogate_models import GENN
 
 # In[11]:
 eps=1e-8
-x_der=41
+x_der=48
 N_obs = 40
 Nmax = 1024
 f = fcn5
@@ -285,15 +285,18 @@ x = np.linspace(1/2*xMin,2*xMax,num)
 y = sm.predict_values(x)
 dy=sm.predict_derivatives(x,0)
 v = sm.predict_variances(x)
+v_diff=sm.predict_variances(x+eps)
+dv=sm.predict_variance_derivatives(x,0)
+
 sigma = np.sqrt(v)
 y_diff=sm.predict_values(x+eps)
 def tangente(x,x_0,y,alpha):
     return alpha*(x-x_0)+y
-for i in range(len(dy)):
-    if dy[i]-(y_diff[i]-y[i])/eps>1e-3:
-        print("indice d'échec=",i)
-print(np.allclose(dy,(y_diff-y)/eps,rtol=1e-3))
-print("d y_diff=",(y_diff[x_der]-y[x_der])/eps,"\ndy=",dy[x_der])
+# for i in range(len(dy)):
+#     if dy[i]-(y_diff[i]-y[i])/eps>1e-3:
+#         print("indice d'échec=",i)
+# print(np.allclose(dy,(y_diff-y)/eps,rtol=1e-3))
+# print("d y_diff=",(y_diff[x_der]-y[x_der])/eps,"\ndy=",dy[x_der])
 plt.figure()
 plt.plot(x, f(x), 'r:', label=r'$f(x)$')
 plt.plot(x,tangente(x,x[x_der],y[x_der],dy[x_der]),label="tangente pour dérivé")
@@ -319,7 +322,21 @@ plt.plot(x,k(1,13,x))
 plt.axvline(x[x_der])
 plt.plot(x,tangente(x,x[x_der],k(1,13,x[x_der]),dk(1,13,x[x_der])))
 plt.show()
-
+plt.figure()
+plt.plot(x,v)
+plt.plot(x,tangente(x,x[x_der],v[x_der],dv[x_der]),label="tangente pour dérivé")
+plt.plot(x,tangente(x,x[x_der],v[x_der],dv[x_der]-(v_diff[x_der]-v[x_der])/eps),label="tangente pour différence fini")
+plt.axvline(x[x_der])
+plt.legend(loc='upper left')
+plt.show()
+print(dv)
+print((v_diff-v)/eps)
+for i in range(len(dv)):
+    if (dv[i]-(v_diff[i]-v[i])/eps)/dv[i]>1e-1:
+        print("indice d'échec=",i)
+        print("v_i=",v[i])
+        print("dv[i]=",dv[i],"dv_diff=",(v_diff[i]-v[i])/eps)
+print(np.allclose(dv,(v_diff-v)/eps,rtol=1e-1))
 # In[ ]:
 
 

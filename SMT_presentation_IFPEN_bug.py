@@ -247,7 +247,7 @@ print(xt,yt)
 sm.set_training_values(xt,yt)
 sm.train()
 # print(xt)
-x_test=np.linspace(-5,10,50)
+x_test=np.linspace(-1,1,50)
 pred=[]
 dpredx=[]
 dpredy=[]
